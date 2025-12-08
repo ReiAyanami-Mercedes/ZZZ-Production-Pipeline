@@ -1,12 +1,10 @@
 # =======================================================================
-# 🛡️ ZZZ-Pipeline Module B: 资产校验与导出系统 (V3.2 最终执行版)
+# 🛡️ ZZZ-Pipeline Module B: Asset Validator & Exporter (V3.3)
 # -----------------------------------------------------------------------
-# [功能清单]
-# 1. 强制命名规范 (SK_/SM_)
-# 2. 强制面数预算 (<50k)
-# 3. 生成 UUID 数字指纹 (IP 保护)
-# 4. 记录黑匣子日志 (Log)
-# 5. 【新增】真实执行 FBX 导出 (不再是模拟)
+# [版本更新 / Version Log]
+# - V3.3: UI 国际化 (English UI) 以解决 Windows 编码乱码问题
+# - V3.2: 集成真实 FBX 导出命令
+# - V3.1: 修复对象类型检测 Bug (isType)
 # =======================================================================
 
 import maya.cmds as cmds
@@ -16,134 +14,135 @@ import datetime
 import uuid
 import getpass
 
-# --- ⚙️ 全局配置 (请根据你的电脑修改路径) ---
+# --- ⚙️ Global Configuration (全局配置) ---
 REQUIRED_PREFIXES = ["SK_", "SM_"]
 MAX_POLYCOUNT = 50000
 
-# 📝 日志存哪里？
+# 📝 Log Path (日志路径)
 LOG_FILE_PATH = r"D:/ZZZ_Pipeline_Log.txt"
-# 📂 模型导出的文件夹存哪里？(会自动创建)
+# 📂 Export Path (导出路径)
 EXPORT_FOLDER = r"D:/ZZZ_Project_Exports"
 
 
 def run_export_validation():
     """
-    主入口函数：点击按钮时执行
+    Main Entry Point (主入口函数)
     """
-    print("\n" + "=" * 50)
-    print("--- [ZZZ Pipeline] 启动资产导出流程... ---")
+    print("\n" + "=" * 60)
+    print("--- [ZZZ Pipeline] Starting Asset Validation Sequence... ---")
 
-    # 1. 获取选中对象
+    # 1. Get Selection (获取选中)
     selection = cmds.ls(selection=True, long=True)
 
-    # 2. 基础检查
+    # 2. Check Selection (基础检查)
     if not selection:
-        _show_error_dialog("未选择对象", "请先选择要导出的模型！")
+        _show_error_dialog("No Selection", "Please select objects to export first!")
         return
 
-    # 3. 命名规范检查
+    # 3. Check Naming (命名检查)
     is_naming_valid, error_message = _validate_naming(selection)
     if not is_naming_valid:
-        _show_error_dialog("命名违规", error_message)
+        _show_error_dialog("Naming Violation", error_message)
         return
 
-    # 4. 面数预算检查
+    # 4. Check Polycount (面数检查)
     is_polycount_valid, error_message = _validate_polycount(selection)
     if not is_polycount_valid:
-        # 允许强行导出，但会记录
+        # Allow force export but log it (允许强行导出，但记录日志)
         response = cmds.confirmDialog(
-            title="[ZZZ 性能警告]",
-            message=error_message + "\n\n是否强行导出？(违规操作将被记录)",
-            button=['强行导出', '取消'],
-            defaultButton='取消',
-            cancelButton='取消',
-            dismissString='取消'
+            title="[ZZZ Performance Warning]",
+            message=f"{error_message}\n\nDo you want to FORCE EXPORT?\n(This violation will be logged)",
+            button=['Force Export', 'Cancel'],
+            defaultButton='Cancel',
+            cancelButton='Cancel',
+            dismissString='Cancel'
         )
-        if response == '取消':
-            print("--- [ZZZ Pipeline] 导出已取消 ---")
+        if response == 'Cancel':
+            print("--- [ZZZ Pipeline] Export Cancelled by User. ---")
             return
 
     # =================================================================
-    # 🚀 5. 真实导出阶段 (Real Export Execution)
+    # 🚀 5. Real Export Execution (真实导出阶段)
     # =================================================================
 
-    # A. 准备数据
+    # A. Data Prep (准备数据)
     asset_uid = str(uuid.uuid4())
     operator_name = getpass.getuser()
-    # 取第一个物体的名字作为文件名
+    # Get asset name from the first selected object
     asset_name = selection[0].split('|')[-1]
 
-    # B. 准备路径
+    # B. Path Prep (准备路径)
     if not os.path.exists(EXPORT_FOLDER):
         os.makedirs(EXPORT_FOLDER)
 
-    # 最终文件路径
     final_export_path = os.path.join(EXPORT_FOLDER, f"{asset_name}.fbx")
-    # 统一路径斜杠 (防止 Windows/Mac 路径报错)
-    final_export_path = final_export_path.replace("\\", "/")
+    final_export_path = final_export_path.replace("\\", "/")  # Path fix
 
-    # C. 执行导出命令
+    # C. Execute Export (执行导出)
     try:
-        # 确保 FBX 插件已加载
+        # Load FBX plugin if needed
         if not cmds.pluginInfo('fbxmaya', query=True, loaded=True):
             cmds.loadPlugin('fbxmaya')
 
-        print(f"--- [ZZZ IO] 正在导出到: {final_export_path} ...")
+        print(f"--- [ZZZ IO] Exporting to: {final_export_path} ...")
 
-        # 核心导出指令：
-        # -v=0: 关闭详细日志
-        # -exportSelected: 只导出选中的
+        # Core Export Command
         cmds.file(final_export_path, force=True, options="v=0;", type="FBX export", exportSelected=True)
 
-        # D. 写入日志 (导出成功后才记)
+        # D. Write Log (写入日志)
         _write_security_log(asset_name, asset_uid, operator_name, is_polycount_valid, final_export_path)
 
-        # E. 成功弹窗
+        # E. Success Dialog (成功弹窗)
         _show_success_dialog(
-            "导出成功 (Success)",
-            f"✅ 资产已落地！\n\n📂 路径: {final_export_path}\n🔑 UUID: {asset_uid}"
+            "Export Successful",
+            f"✅ Asset Exported Successfully!\n\n📂 Path: {final_export_path}\n🔑 UUID: {asset_uid}"
         )
-        print(f"--- [ZZZ IO] 导出完成。UUID: {asset_uid} ---")
+        print(f"--- [ZZZ IO] Export Complete. UUID: {asset_uid} ---")
 
     except Exception as e:
-        _show_error_dialog("导出崩溃", f"Maya 导出命令执行失败：\n{e}")
+        _show_error_dialog("Export Failed", f"Maya Export Command Failed:\n{e}")
         print(f"--- [ZZZ Error] {e} ---")
 
-    print("=" * 50 + "\n")
+    print("=" * 60 + "\n")
 
 
 def _validate_naming(objects):
-    """检查命名规范"""
+    """ Validate Naming Convention (检查命名规范) """
     for obj in objects:
         short_name = obj.split('|')[-1]
         if not any(short_name.startswith(prefix) for prefix in REQUIRED_PREFIXES):
-            return (False, f'对象 "{short_name}" 命名不规范！\n必须以 {REQUIRED_PREFIXES} 开头')
+            return (False, f'Object "{short_name}" violates naming convention!\nMust start with: {REQUIRED_PREFIXES}')
     return (True, "")
 
 
 def _validate_polycount(objects):
-    """检查面数"""
+    """ Validate Polycount (检查面数) """
     total_faces = 0
     all_meshes = []
+
+    # Find all mesh children
     children = cmds.listRelatives(objects, allDescendents=True, type='mesh', fullPath=True)
     if children:
         all_meshes.extend(children)
+
+    # Check roots
     for obj in objects:
         if cmds.objectType(obj, isType='mesh'):
             all_meshes.append(obj)
 
+    # Calculate unique faces
     for mesh in set(all_meshes):
         if cmds.objExists(mesh):
             total_faces += cmds.polyEvaluate(mesh, face=True)
 
     if total_faces > MAX_POLYCOUNT:
-        return (False, f'总面数 ({total_faces}) 超过预算 ({MAX_POLYCOUNT})！')
+        return (False, f'Total Polycount ({total_faces}) exceeds budget ({MAX_POLYCOUNT})!')
 
     return (True, "")
 
 
 def _write_security_log(asset_name, uid, user, is_clean, path):
-    """写入日志"""
+    """ Write to local log file (写入本地日志) """
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     status = "CLEAN" if is_clean else "WARNING_OVERRIDE"
     log_entry = f"[{timestamp}] | {status} | User:{user} | Asset:{asset_name} | Path:{path} | UUID:{uid}\n"
@@ -157,15 +156,15 @@ def _write_security_log(asset_name, uid, user, is_clean, path):
 
 
 def _show_error_dialog(title, message):
-    cmds.confirmDialog(title=f'[ZZZ 拦截] {title}', message=f'❌ {message}', button=['好的'])
+    cmds.confirmDialog(title=f'[ZZZ Error] {title}', message=f'❌ {message}', button=['OK'])
 
 
 def _show_success_dialog(title, message):
-    cmds.confirmDialog(title=f'[ZZZ 放行] {title}', message=message, button=['完成'])
+    cmds.confirmDialog(title=f'[ZZZ Success] {title}', message=message, button=['Done'])
 
 
 # =================================================================
-# 👇 自动执行入口
+# 👇 Auto Execution (自动执行入口)
 # =================================================================
 if __name__ == "__main__":
     run_export_validation()
