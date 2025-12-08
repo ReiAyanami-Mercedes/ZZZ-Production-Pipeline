@@ -16,7 +16,7 @@
 
 ### 🎨 A. 渲染核心 (Rendering Core)
 *   **SDF 面部光影算法：** 摒弃传统 Step 硬阴影，基于预计算的 **SDF (Signed Distance Field)** 数据图，实现了在动态光照下依然柔和、平滑的面部阴影过渡。
-    *   *![SDF效果对比](Docs/Images/SDF_Compare.png)*  <-- (这里换成你的 Before/After 对比图)
+    * ![alt text](法线传递处理平滑阴影.png)
 *   **Uber Shader 架构：** 将半兰伯特、菲涅尔边缘光等常用渲染技术封装进一个高度可配置的 `Uber_Character_V1.shader`，通过宏开关管理，兼顾效果与性能。
 
 ### ⚙️ B. 自动化工具链 (Automation Toolchain)
