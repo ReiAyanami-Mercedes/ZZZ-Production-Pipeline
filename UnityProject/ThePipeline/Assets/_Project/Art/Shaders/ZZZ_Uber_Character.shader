@@ -1,36 +1,56 @@
 ﻿// =======================================================================
-// 🌌 ZZZ-Pipeline Module A: 核心渲染 Shader (Uber V1.2 - 终极注释版)
+// 🌌 ZZZ-Pipeline Module A: 核心渲染 Shader (Uber V2.7 - 功能开关最终版)
 // -----------------------------------------------------------------------
-// 目标：实现半兰伯特光照、SDF面部阴影、菲涅尔边缘光。
+// [V2.7 核心升级]
+// 1. 新增 MatCap 高光开关 (_USE_MATCAP_HIGHLIGHT):
+//    现在可以在材质球上独立开启/关闭高光，实现脸和眼睛的渲染分离。
+// 2. Properties 块完全净化: 移除所有非 ASCII 字符，杜绝编译错误。
 // =======================================================================
 
-Shader "ZZZ/Uber_Character_V1"
+Shader "ZZZ/Uber_Character_V2"
 {
     // ===================================================================
-    // 1. 【菜单】(Properties) - 所有暴露给美术的参数
+    // 1. Properties (绝对纯净版)
     // ===================================================================
     Properties
     {
         [Header(Core Textures)]
-        _BaseColor ("角色主色 (Base Color)", Color) = (1,1,1,1)
-        _MainTex ("基础贴图 (Albedo)", 2D) = "white" {}
-        _SDFMap ("SDF数据图 (Linear)", 2D) = "white" {} // 核心：SDF 阴影阈值图
+        _BaseColor ("Base Color", Color) = (1,1,1,1)
+        _MainTex ("Albedo Map", 2D) = "white" {}
+        _SDFMap ("SDF Map (Linear)", 2D) = "white" {}
+
+        [Space(10)]
+        [Header(Parallax Eye)]
+        _ParallaxMap ("Eye Depth Map (Linear)", 2D) = "black" {}
+        _ParallaxScale ("Parallax Depth", Range(0, 1.0)) = 0.05      
+        _PupilScale ("Pupil Scale", Range(0.5, 2.0)) = 1.0
+
+        [Space(10)]
+        [Header(MatCap Highlight)]
+        [Toggle(_USE_MATCAP_HIGHLIGHT)] _UseMatCapHighlight ("Enable MatCap Highlight", Float) = 0
+        [HDR] _HighlightColor ("Highlight Color", Color) = (1,1,1,1)
+        _MatCapCenterX ("Center X (Calibration)", Range(-1.0, 1.0)) = 0.0
+        _MatCapCenterY ("Center Y (Calibration)", Range(-1.0, 1.0)) = 0.0
+        _HighlightX ("Pos X (Offset)", Range(-1.0, 1.0)) = 0.1
+        _HighlightY ("Pos Y (Offset)", Range(-1.0, 1.0)) = 0.1
+        _HighlightSize ("Size", Range(0.0, 0.5)) = 0.05 
+        _HighlightSoftness ("Softness", Range(0.001, 0.2)) = 0.02
 
         [Space(10)]
         [Header(Lighting Settings)]
-        [Toggle(_HALF_LAMBERT)] _UseHalfLambert ("开启 半兰伯特", Float) = 1
-        _ShadowColor ("阴影颜色", Color) = (0.6, 0.5, 0.6, 1)
-        _ShadowSmoothness ("阴影柔和度", Range(0.001, 0.5)) = 0.05
+        [Toggle(_HALF_LAMBERT)] _UseHalfLambert ("Enable Half Lambert", Float) = 1
+        _ShadowColor ("Shadow Color", Color) = (0.6, 0.5, 0.6, 1)
+        _ShadowSmoothness ("Shadow Softness", Range(0.001, 0.5)) = 0.05
 
         [Space(10)]
         [Header(Rim Light)]
-        [Toggle(_RIM_LIGHT)] _UseRimLight ("开启 边缘光", Float) = 1
-        [HDR] _RimColor ("边缘光颜色 (HDR)", Color) = (1,1,1,1)
-        _RimPower ("边缘光宽度 (Power)", Range(0.1, 10)) = 4.0
+        [Toggle(_RIM_LIGHT)] _UseRimLight ("Enable Rim Light", Float) = 1
+        [HDR] _RimColor ("Rim Color", Color) = (1,1,1,1)
+        _RimPower ("Rim Power", Range(0.1, 10)) = 4.0
     }
 
     // ===================================================================
-    // 2. 【渲染通道】(SubShader & Pass) - 定义渲染流程
+    // 2. SubShader & Pass
     // ===================================================================
     SubShader
     {
@@ -45,6 +65,7 @@ Shader "ZZZ/Uber_Character_V1"
         {
             Name "ZZZ_Forward"
             Tags { "LightMode"="UniversalForward" }
+            
             Blend Off 
             ZWrite On
 
@@ -52,122 +73,93 @@ Shader "ZZZ/Uber_Character_V1"
             #pragma vertex vert
             #pragma fragment frag
             
+            // 变体开关
             #pragma shader_feature _HALF_LAMBERT
             #pragma shader_feature _RIM_LIGHT
+            #pragma shader_feature _USE_MATCAP_HIGHLIGHT // 新增高光开关
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            // ===================================================================
-            // 3. 【数据结构】(Structs & Buffers) - 定义数据格式
-            // ===================================================================
-            struct Attributes
-            {
-                float4 positionOS : POSITION; // 顶点在模型空间的位置
-                float2 uv : TEXCOORD0;       // UV 坐标
-                float3 normalOS : NORMAL;      // 顶点在模型空间的法线
-            };
-
-            struct Varyings
-            {
-                float4 positionCS : SV_POSITION; // 顶点在裁剪空间的位置
-                float2 uv : TEXCOORD0;         // UV 坐标
-                float3 normalWS : TEXCOORD1;     // 法线在世界空间的方向
-                float3 viewDirWS : TEXCOORD2;    // 视线在世界空间的方向
-            };
-            
+            // ... (Structs 和 CBUFFER 和上一版 V2.6 保持一致，我已为你检查)
+            struct Attributes { float4 p:POSITION; float2 uv:TEXCOORD0; float3 n:NORMAL; float4 t:TANGENT; };
+            struct Varyings { float4 p:SV_POSITION; float2 uv:TEXCOORD0; float3 n:TEXCOORD1; float3 v:TEXCOORD2; float3 vTS:TEXCOORD3;};
             CBUFFER_START(UnityPerMaterial)
-                 float4 _BaseColor;
-                 float4 _MainTex_ST;
-                 float4 _ShadowColor;
-                 float4 _RimColor;
-                 float _ShadowSmoothness;
-                 float _RimPower;
+                float4 _BaseColor, _MainTex_ST, _ShadowColor, _RimColor;
+                float _ShadowSmoothness, _RimPower;
+                float _ParallaxScale, _PupilScale;
+                float4 _HighlightColor;
+                float _MatCapCenterX, _MatCapCenterY;
+                float _HighlightX, _HighlightY;
+                float _HighlightSize, _HighlightSoftness;
             CBUFFER_END
-            
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
-            TEXTURE2D(_SDFMap);  SAMPLER(sampler_SDFMap);
+            TEXTURE2D(_SDFMap); SAMPLER(sampler_SDFMap);
+            TEXTURE2D(_ParallaxMap); SAMPLER(sampler_ParallaxMap);
 
-            // ===================================================================
-            // 4. 【顶点着色器】(Vertex Shader) - 负责空间变换
-            // ===================================================================
-            Varyings vert (Attributes input)
-            {
-                Varyings output = (Varyings)0;
-                
-                // 获取顶点在世界空间的位置、裁剪空间的位置等
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
-                output.positionCS = vertexInput.positionCS;
-                
-                // 获取顶点法线在世界空间的方向
-                VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS);
-                output.normalWS = normalInput.normalWS;
-                
-                // 获取从摄像机到顶点的视线方向
-                output.viewDirWS = GetWorldSpaceViewDir(vertexInput.positionWS);
-                
-                // 处理贴图的平铺和偏移
-                output.uv = TRANSFORM_TEX(input.uv, _MainTex);
-                
-                return output;
-
+            Varyings vert(Attributes i) {
+                Varyings o = (Varyings)0;
+                o.p = GetVertexPositionInputs(i.p.xyz).positionCS;
+                VertexNormalInputs ni = GetVertexNormalInputs(i.n, i.t);
+                o.n = ni.normalWS;
+                float3 vWS = GetWorldSpaceNormalizeViewDir(i.p.xyz);
+                o.v = vWS;
+                float3x3 tbn = float3x3(ni.tangentWS, ni.bitangentWS, ni.normalWS);
+                o.vTS = mul(vWS, tbn);
+                o.uv = TRANSFORM_TEX(i.uv, _MainTex);
+                return o;
             }
 
-            // ===================================================================
-            // 5. 【片元着色器】(Fragment Shader) - 负责光影计算
-            // ===================================================================
-            half4 frag (Varyings input) : SV_Target
+            half4 frag (Varyings i) : SV_Target
             {
-                // A. 【数据准备】
-                // ----------------
-                // 规范化，确保向量长度为 1，计算才准确
-                float3 normalWS = normalize(input.normalWS);
-                float3 viewDirWS = normalize(input.viewDirWS);
+                // === A. 视差映射 (Parallax) ===
+                float3 vTS = normalize(i.vTS);
+                float depth = SAMPLE_TEXTURE2D(_ParallaxMap, sampler_ParallaxMap, i.uv).g;
+                float2 parallaxOffset = vTS.xy * (1.0 - depth) * _ParallaxScale;
+                float2 finalUV = i.uv - parallaxOffset; 
                 
-                // 获取场景中的主光源信息
-                Light mainLight = GetMainLight();
-                float3 lightDir = normalize(mainLight.direction);
-                float3 lightColor = mainLight.color;
-                
-                // 采样贴图
-                half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv) * _BaseColor;
-                float sdf_threshold = SAMPLE_TEXTURE2D(_SDFMap, sampler_SDFMap, input.uv).r;
-
-                // B. 【光照计算】
-                // ----------------
-                // NdotL 是光线和法线的点积，值越大，说明越正对着光
-                float NdotL = dot(normalWS, lightDir);
-
+                // === B. 基础渲染 (Base Rendering) ===
+                float3 nWS = normalize(i.n);
+                half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, finalUV) * _BaseColor;
+                float sdf_threshold = SAMPLE_TEXTURE2D(_SDFMap, sampler_SDFMap, finalUV).r;
+                Light light = GetMainLight();
+                float3 lDir = normalize(light.direction);
+                float NdotL = dot(nWS, lDir);
                 #if _HALF_LAMBERT
-                    NdotL = NdotL * 0.5 + 0.5; // 半兰伯特：将 [-1, 1] 映射到 [0, 1]
+                    NdotL = NdotL * 0.5 + 0.5; 
                 #else
-                    NdotL = saturate(NdotL);   // 普通兰伯特：将 [-1, 0] 截断为 0
+                    NdotL = saturate(NdotL);
                 #endif
-
-                // C. 【SDF 阴影混合】 - 核心壁垒
-                // --------------------------------
-                // smoothstep(min, max, x) 会在 min 和 max 之间平滑地插值
                 float shadowMask = smoothstep(sdf_threshold - _ShadowSmoothness, sdf_threshold + _ShadowSmoothness, NdotL);
-                
-                // lerp(A, B, t) - 如果 t=0 返回 A，t=1 返回 B
                 float3 finalDiffuse = lerp(albedo.rgb * _ShadowColor.rgb, albedo.rgb, shadowMask);
-                
-                // 乘以主光源颜色
-                float3 finalColor = finalDiffuse * lightColor;
+                float3 finalColor = finalDiffuse * light.color;
 
-                // D. 【边缘光叠加】
-                // -----------------
                 #if _RIM_LIGHT
-                    // 菲涅尔公式：视线和法线越垂直，值越大
-                    float fresnel = 1.0 - saturate(dot(normalWS, viewDirWS));
+                    float3 vWS = normalize(i.v);
+                    float fresnel = 1.0 - saturate(dot(nWS, vWS));
                     float rim = pow(fresnel, _RimPower);
-                    
-                    // 将边缘光叠加到最终颜色上
                     finalColor += _RimColor.rgb * rim * albedo.rgb;
                 #endif
-             // ===================================================================
-             // 最终返回：将所有计算结果混合，并保证 Alpha 为 1.0 (不透明)
-             // ===================================================================
+
+                // =============================================================
+                // C. 【核心修正】带开关的 MatCap 高光
+                // =============================================================
+                #if _USE_MATCAP_HIGHLIGHT
+                    // 1. 获取视图空间法线
+                    float3 normalVS = TransformWorldToViewDir(nWS);
+                    
+                    // 2. 映射到 MatCap UV 坐标并校准
+                    float2 matcapUV = normalVS.xy * 0.5 + 0.5;
+                    matcapUV += float2(_MatCapCenterX, _MatCapCenterY);
+                    
+                    // 3. 计算高光中心并叠加
+                    float2 highlightCenter = float2(0.5, 0.5) + float2(_HighlightX, _HighlightY);
+                    float dist = length(matcapUV - highlightCenter);
+                    float highlightMask = 1.0 - smoothstep(_HighlightSize, _HighlightSize + _HighlightSoftness, dist);
+                    
+                    finalColor += _HighlightColor.rgb * highlightMask;
+                #endif
+
                 return half4(finalColor, 1.0);
             }
             ENDHLSL
