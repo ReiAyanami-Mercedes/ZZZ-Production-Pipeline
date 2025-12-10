@@ -1,0 +1,29 @@
+﻿#pragma kernel CSMain
+
+struct ParticleData
+{
+    float4 position;
+    float4 color;
+};
+
+RWStructuredBuffer<ParticleData> ResultBuffer;
+float _Time;
+
+// 🔧 新增：接收外部传入的颜色
+float4 _LegionColor;
+
+[numthreads(64, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    ParticleData p = ResultBuffer[id.x];
+    
+    // 运动逻辑 (保持不变)
+    p.position.y = sin(_Time + id.x * 0.1) * 2.0;
+    
+    // 🔧 颜色逻辑 (不再写死！)
+    // 我们让颜色随着高度稍微变一点亮度，但基调由 _LegionColor 决定
+    float heightFactor = p.position.y * 0.2 + 0.8; // 亮度变化
+    p.color = _LegionColor * heightFactor;
+    
+    ResultBuffer[id.x] = p;
+}
