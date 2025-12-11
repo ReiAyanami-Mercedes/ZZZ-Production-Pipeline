@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a2b592aaf3ce6145807cd5b9685d7ec, type: 3}
+  m_Name: ZZZ_Core_Config
+  m_EditorClassIdentifier: 
+  shadowColor: {r: 0.6, g: 0.6, b: 0.8, a: 1}
+  sdfThreshold: 0.5
+  sdfSmoothness: 0.05
+  enableOutline: 1
+  outlineWidth: 0.02
+  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  gpuInstancing: 1
+  debugMode: 0
