@@ -1,71 +1,109 @@
-# 🌌 ZZZ-Pipeline V1.0 - 工业级风格化渲染管线原型
-**A Data-Driven & Automated Pipeline Prototype for Stylized Real-time Rendering.**
+# ⚡ ZZZ-Production-Pipeline (V2.0)
+
+> **Current Status:** 🚧 Active Development (Day 13)
+> **Branch:** `v2.0-development`
+> **Codename:** Industrial Crystal (工业结晶)
+
+![Unity](https://img.shields.io/badge/Unity-2022.3%2B-black?logo=unity)
+![RenderPipeline](https://img.shields.io/badge/RenderPipeline-URP-blue)
+![Architecture](https://img.shields.io/badge/Architecture-DOD-green)
+![Tests](https://img.shields.io/badge/Tests-Passing-success)
+
+## 📖 简介 (Introduction)
+
+**ZZZ-Production-Pipeline V2.0** 是基于 Unity URP 构建的 **二次元风格化渲染工业管线**。
+与 V1.0 的纯视觉探索不同，V2.0 致力于解决 **“规模化生产”** 问题。本项目引入了 **DOD (面向数据设计)**、**自动化测试 (TDD)** 以及 **GPU Driven** 渲染技术，旨在构建一套可扩展、高性能、工具完善的次世代卡通渲染方案。
 
 ---
 
-## 1. 核心理念 (Core Philosophy)
-本管线旨在解决现代二次元游戏开发中的两大核心矛盾：
--   **【艺术表现 vs. 技术限制】**：如何通过算法（而非手绘）实现具有体积感、可呼吸的次世代卡通光影。
--   **【协作效率 vs. 资产混乱】**：如何通过自动化工具链，在多人协作中保证数据流的纯净与标准化，降低“人祸”导致的 Bug 率。
+## 🏗️ 核心架构 (Core Architecture)
 
-本项目不仅仅是一个渲染 Demo，它是一套遵循 **工业化标准**、具备 **架构思维** 的微型生产系统。
+### 🎨 Module A: 渲染奇点 (Visual Singularity)
+> *Goal: 极致的二次元面部表现与海量单位渲染能力。*
 
----
+- [x] **Uber Shader V2:** 基于 SDF 面部阴影、视差遮蔽 (Parallax)、半兰伯特光照。
+- [ ] **GPU Driven Legion:** 基于 `ComputeShader` + `DrawMeshInstancedIndirect` 实现 10,000+ 单位同屏 (开发中)。
+- [ ] **Stylized Post-Processing:** 风格化后处理 (Bloom, Color Grading)。
 
-## 2. 核心模块与技术壁垒 (Core Modules & Features)
+### ⚙️ Module B: 工业化工具链 (Industrial Toolchain)
+> *Goal: 用自动化工具解放人力，用 UI Toolkit 提升交互体验。*
 
-### 🎨 A. 渲染核心 (Rendering Core)
-*   **SDF 面部光影算法：** 摒弃传统 Step 硬阴影，基于预计算的 **SDF (Signed Distance Field)** 数据图，实现了在动态光照下依然柔和、平滑的面部阴影过渡。
-    *   ![SDF效果对比](Docs/Images/法线传递处理平滑阴影.png)
-*   **Uber Shader 架构：** 将半兰伯特、菲涅尔边缘光等常用渲染技术封装进一个高度可配置的 `Uber_Character_V1.shader`，通过宏开关管理，兼顾效果与性能。
+- [x] **Cockpit Dashboard:** 基于 **UI Toolkit** 构建的管线可视化控制台。
+- [x] **Asset Processor:** 自动化的资产导入管线（强制 Linear 空间、SDF 贴图自动识别）。
+- [ ] **Art Validator:** 美术资产合规性自动检测工具 (Python/C#)。
 
-### ⚙️ B. 自动化工具链 (Automation Toolchain)
-*   **资产守门人 (AssetProcessor):** 基于 C# `AssetPostprocessor` 开发，实现了资产的 **“导入即标准化”**。
-    -   **功能：** 自动识别 `_sdf` 等后缀，强制关闭 sRGB/压缩，从源头杜绝了 **线性工作流 (Linear Workflow)** 中的色彩空间错误。
-    -  *   ![AssetProcessor Log](Docs/Images/资产守门员.png)
-*   **DCC 资产海关 (Python Validator):** 基于 Maya Python API 开发，实现了导出前的 **强制校验**。
-    -   **功能：** 拦截不符合命名规范 (`SK_`/`SM_`) 和性能预算 (面数超标) 的资产，将错误阻挡在 DCC 软件内部。
-    -  *   ![Maya Validator](Docs/Images/命名规范.png)
+### 🧠 Module C: 数据驱动核心 (Data Core)
+> *Goal: 逻辑与数据分离，实现热更友好的配置管理。*
 
-### 🏛️ C. 数据驱动架构 (Data-Driven Architecture)
-*   **渲染配置资产化：** 使用 **ScriptableObject** 将渲染参数（阴影色、边缘光强度等）从材质中解耦，变为可独立配置、可热更的 `Render Profile` 资产。
- - *   ![Data Driven Architecture](Docs/Images/ZZZ_Module_C_DataDriven_Architecture.png)
-*   **可观测性系统 (Observability):** 实现了简易的 **Runtime Profiler**，可在运行时实时监控 FPS、内存等关键性能指标。
-    *   ![Runtime Profiler](Docs/Images/性能监视.png)
+- [x] **Global Render Settings:** 基于 `ScriptableObject` 的全局渲染配置中心。
+- [x] **Runtime Manager:** 使用 `Shader.SetGlobal` 实现高性能的参数同步。
+- [ ] **Profile Switching:** 支持动态切换日夜/室内外渲染配置。
 
----
+### 🛡️ Module F: 质量保障 (QA & Testing)
+> *Goal: 引入 TDD 流程，确保管线逻辑健壮性。*
 
-## 3. 技术栈 (Tech Stack)
--   **引擎:** Unity 2022.3 (URP)
--   **渲染:** HLSL, 色彩科学 (Linear Space, Tone Mapping)
--   **工具:** C# (Editor Extension), Python (Maya API)
--   **DCC:** Houdini (VDB & HDA), Maya
--   **架构思想:** DOD (Data-Oriented Design), 软件工程自动化
+- [x] **Unit Testing:** 集成 **NUnit** 框架。
+- [x] **Automation:** 针对 `AssetProcessor` 的自动化测试用例 (`ZZZAssetProcessorTests`)。
 
 ---
 
-## 4. 未来展望 (V2.0 Roadmap)
-本 V1.0 版本已验证了核心管线的可行性。V2.0 将在以下方向进行深度挖掘：
--   **[渲染]** 引入 **Compute Shader** 与 **视差映射 (Parallax)**，实现更高级的 GPU Driven 特效与眼球渲染。
--   **[动画]** 搭建 **Houdini KineFX** 流程，为 **Motion Matching** 提供自动化数据清洗管线。
--   **[架构]** 探索 **Unity 6** 的 **GPU Driven Rendering** 新特性，并预研 **D3D12 Native Plugin** 的可能性。
+## 📅 开发日志 (DevLog)
+
+### Day 13: 基础设施建设 (Infrastructure)
+- **Feature:** 引入 Unity Test Runner，完成首个资产管线自动化测试。
+- **Feature:** 搭建 UI Toolkit 编辑器窗口框架 (`ZZZPipelineWindow`)。
+- **Refactor:** 重构全局渲染配置为 `GlobalRenderSettings` (ScriptableObject)。
+- **Fix:** 统一全项目编码格式为 UTF-8，修复命名空间冲突。
+
+### Day 12: 渲染底层重构
+- **Tech:** 实现 `ComputeBuffer` 数据结构，为 GPU Instancing 铺路。
+- **Shader:** 编写 `Uber_Instanced_Legion` Shader，支持手动矩阵构建。
+
+---
+
+## 🚀 快速开始 (Getting Started)
+
+1. Clone 本仓库 (确保切换到 `v2.0-development` 分支)。
+2. 打开 Unity (推荐 2022.3 LTS)。
+3. 顶部菜单选择 `ZZZ-Pipeline` -> `Open Control Center` 打开管线控制台。
+4. 打开 `Window` -> `General` -> `Test Runner` 运行单元测试。
+
+---
+
+*Made with ❤️ by [Your Name] & The AI Architect.*
 
 
+---
 
+## 🔮 未来展望 (Future Horizons: V2.5)
+**Codename:** Hybrid Core (混合架构)
+*目标：突破 C# 脚本层的性能天花板，构建“Unity + Native C++”的终极形态。*
 
+### 💃 动作之魂：Motion Matching (运动匹配)
+> *Status: R&D Phase (预研阶段)*
+> *Tech Stack: Houdini KineFX -> Unity DOTS*
 
+- 摒弃传统状态机，采用 **数据驱动** 的姿态搜索算法。
+- 构建基于 **Houdini KineFX** 的自动化动捕数据清洗管线。
+- 实现基于 **Job System** 的高并发动画解算。
 
+### ⚡ 性能之骨：Native D3D12 Plugin
+> *Status: Planned (架构规划中)*
+> *Tech Stack: C++ / DirectX 12 / HLSL*
 
+- **Bypass Unity:** 绕过引擎开销，直接通过 C++ DLL 调用底层 Graphics API。
+- **Raw Performance:** 实现 `NativePluginBridge`，接管 Compute Shader 的调度。
+- **Hello Triangle:** 也就是我们即将挑战的 "The First Triangle" —— 从底层画出的第一个三角形。
 
+---
 
+## 🏆 The GDC Ambition (技术宣言)
+本项目不仅仅是一个游戏工程，更是一次对 **“独立游戏工业化”** 的极限探索。
+我们的终极目标是将这套管线的开发经验整理成案，剑指 **GDC (Game Developers Conference)** 的 Technical Art / Programming 讲台。
 
+**Core Philosophy:**
+1.  **Industrialization:** 用规则对抗混乱，用自动化解放人力。
+2.  **Democratization:** 让独立开发者也能驾驭 3A 级的生产管线。
+3.  **Aesthetics:** 技术永远服务于艺术表达。
 
-
-
-
-
-
-
-
-
-
+> *"We don't just write code; we forge the tools that build worlds."*
