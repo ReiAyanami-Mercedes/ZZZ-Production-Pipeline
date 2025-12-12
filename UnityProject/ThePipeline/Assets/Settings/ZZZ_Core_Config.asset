@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a2b592aaf3ce6145807cd5b9685d7ec, type: 3}
   m_Name: ZZZ_Core_Config
   m_EditorClassIdentifier: 
-  shadowColor: {r: 0.6, g: 0.6, b: 0.8, a: 1}
-  sdfThreshold: 0.5
-  sdfSmoothness: 0.05
+  shadowColor: {r: 0.735849, g: 0.03123886, b: 0.57267624, a: 1}
+  sdfThreshold: 0.535
+  sdfSmoothness: 0.04
   enableOutline: 1
-  outlineWidth: 0.02
-  outlineColor: {r: 0, g: 0, b: 0, a: 1}
+  outlineWidth: 0.0642
+  outlineColor: {r: 0.0980525, g: 1, b: 0, a: 1}
   gpuInstancing: 1
   debugMode: 0

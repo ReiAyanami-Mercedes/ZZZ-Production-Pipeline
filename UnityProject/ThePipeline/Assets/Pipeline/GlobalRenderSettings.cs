@@ -2,24 +2,28 @@
 
 namespace ZZZ.Runtime
 {
-    // [CreateAssetMenu] 让我们可以右键创建这个资产
+    // [CreateAssetMenu] 让我们可以在 Project 窗口右键创建这个配置文件
     [CreateAssetMenu(fileName = "ZZZ_GlobalSettings", menuName = "ZZZ Pipeline/Global Render Settings")]
     public class GlobalRenderSettings : ScriptableObject
     {
-        [Header("🎨 Toon Shading (风格化渲染)")]
+        // --- 1. 风格化渲染配置 (Toon Shading) ---
+        // [Fix] 删掉了 🎨 Emoji
+        [Header("Toon Shading Settings")]
 
-        [Tooltip("全局阴影颜色 (Shadow Color)")]
+        [Tooltip("Global Shadow Color")]
         public Color shadowColor = new Color(0.6f, 0.6f, 0.8f, 1.0f);
 
         [Range(0f, 1f)]
-        [Tooltip("SDF 光影阈值 (控制阴影面积)")]
+        [Tooltip("SDF Threshold (Control Shadow Area)")]
         public float sdfThreshold = 0.5f;
 
         [Range(0f, 1f)]
-        [Tooltip("SDF 羽化程度 (软硬阴影过渡)")]
+        [Tooltip("SDF Smoothness (Shadow Softness)")]
         public float sdfSmoothness = 0.05f;
 
-        [Header("🖋️ Outline (描边配置)")]
+        // --- 2. 描边配置 (Outline) ---
+        // [Fix] 删掉了 🖋️ Emoji
+        [Header("Outline Settings")]
         public bool enableOutline = true;
 
         [Range(0f, 0.1f)]
@@ -27,7 +31,9 @@ namespace ZZZ.Runtime
 
         public Color outlineColor = Color.black;
 
-        [Header("⚙️ System (系统配置)")]
+        // --- 3. 系统配置 (System) ---
+        // [Fix] 删掉了 ⚙️ Emoji
+        [Header("System Settings")]
         public bool gpuInstancing = true;
         public bool debugMode = false;
     }

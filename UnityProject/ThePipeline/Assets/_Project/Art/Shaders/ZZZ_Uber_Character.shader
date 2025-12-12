@@ -1,16 +1,15 @@
 ﻿// =======================================================================
-// 🌌 ZZZ-Pipeline Module A: 核心渲染 Shader (Uber V2.7 - 功能开关最终版)
+// 🌌 ZZZ-Pipeline Module A: 核心渲染 Shader (Uber V2.8 - 全局接管版)
 // -----------------------------------------------------------------------
-// [V2.7 核心升级]
-// 1. 新增 MatCap 高光开关 (_USE_MATCAP_HIGHLIGHT):
-//    现在可以在材质球上独立开启/关闭高光，实现脸和眼睛的渲染分离。
-// 2. Properties 块完全净化: 移除所有非 ASCII 字符，杜绝编译错误。
+// [V2.8 Global Control]
+// 1. 阴影控制 (Shadow) 移交 GlobalRenderSettings 全局管理。
+// 2. 保留 MatCap 高光、视差映射、边缘光等所有 V2.7 功能。
 // =======================================================================
 
 Shader "ZZZ/Uber_Character_V2"
 {
     // ===================================================================
-    // 1. Properties (绝对纯净版)
+    // 1. Properties
     // ===================================================================
     Properties
     {
@@ -39,8 +38,10 @@ Shader "ZZZ/Uber_Character_V2"
         [Space(10)]
         [Header(Lighting Settings)]
         [Toggle(_HALF_LAMBERT)] _UseHalfLambert ("Enable Half Lambert", Float) = 1
-        _ShadowColor ("Shadow Color", Color) = (0.6, 0.5, 0.6, 1)
-        _ShadowSmoothness ("Shadow Softness", Range(0.001, 0.5)) = 0.05
+        
+        // ❌ [Modified] 这些属性虽然留在这里为了占位(防止材质球报错)，但 Shader 内部不再使用它们
+        _ShadowColor ("Shadow Color (Override by Global)", Color) = (0.6, 0.5, 0.6, 1)
+        _ShadowSmoothness ("Shadow Softness (Override by Global)", Range(0.001, 0.5)) = 0.05
 
         [Space(10)]
         [Header(Rim Light)]
@@ -76,23 +77,34 @@ Shader "ZZZ/Uber_Character_V2"
             // 变体开关
             #pragma shader_feature _HALF_LAMBERT
             #pragma shader_feature _RIM_LIGHT
-            #pragma shader_feature _USE_MATCAP_HIGHLIGHT // 新增高光开关
+            #pragma shader_feature _USE_MATCAP_HIGHLIGHT
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
-            // ... (Structs 和 CBUFFER 和上一版 V2.6 保持一致，我已为你检查)
             struct Attributes { float4 p:POSITION; float2 uv:TEXCOORD0; float3 n:NORMAL; float4 t:TANGENT; };
             struct Varyings { float4 p:SV_POSITION; float2 uv:TEXCOORD0; float3 n:TEXCOORD1; float3 v:TEXCOORD2; float3 vTS:TEXCOORD3;};
+            
+            // --- CBUFFER (材质本地属性) ---
             CBUFFER_START(UnityPerMaterial)
-                float4 _BaseColor, _MainTex_ST, _ShadowColor, _RimColor;
-                float _ShadowSmoothness, _RimPower;
+                float4 _BaseColor, _MainTex_ST, _RimColor; // 移除了 _ShadowColor
+                float _RimPower;                           // 移除了 _ShadowSmoothness
                 float _ParallaxScale, _PupilScale;
                 float4 _HighlightColor;
                 float _MatCapCenterX, _MatCapCenterY;
                 float _HighlightX, _HighlightY;
                 float _HighlightSize, _HighlightSoftness;
+                
+                // 为了兼容 Properties 块，这里定义但不使用 (或者直接删掉)
+                 float4 _ShadowColor;
+                 float _ShadowSmoothness;
             CBUFFER_END
+
+            // --- 🔥 全局变量定义 (Global Variables) ---
+            // 这些变量由 ZZZRenderManager 统一控制
+            float4 _GlobalShadowColor;
+            float _GlobalShadowSmoothness;
+
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
             TEXTURE2D(_SDFMap); SAMPLER(sampler_SDFMap);
             TEXTURE2D(_ParallaxMap); SAMPLER(sampler_ParallaxMap);
@@ -130,8 +142,11 @@ Shader "ZZZ/Uber_Character_V2"
                 #else
                     NdotL = saturate(NdotL);
                 #endif
-                float shadowMask = smoothstep(sdf_threshold - _ShadowSmoothness, sdf_threshold + _ShadowSmoothness, NdotL);
-                float3 finalDiffuse = lerp(albedo.rgb * _ShadowColor.rgb, albedo.rgb, shadowMask);
+                
+                // 🔥🔥🔥 [Modified] 使用全局变量 _Global... 🔥🔥🔥
+                float shadowMask = smoothstep(sdf_threshold - _GlobalShadowSmoothness, sdf_threshold + _GlobalShadowSmoothness, NdotL);
+                float3 finalDiffuse = lerp(albedo.rgb * _GlobalShadowColor.rgb, albedo.rgb, shadowMask);
+                
                 float3 finalColor = finalDiffuse * light.color;
 
                 #if _RIM_LIGHT
@@ -141,22 +156,14 @@ Shader "ZZZ/Uber_Character_V2"
                     finalColor += _RimColor.rgb * rim * albedo.rgb;
                 #endif
 
-                // =============================================================
-                // C. 【核心修正】带开关的 MatCap 高光
-                // =============================================================
+                // === C. MatCap 高光 ===
                 #if _USE_MATCAP_HIGHLIGHT
-                    // 1. 获取视图空间法线
                     float3 normalVS = TransformWorldToViewDir(nWS);
-                    
-                    // 2. 映射到 MatCap UV 坐标并校准
                     float2 matcapUV = normalVS.xy * 0.5 + 0.5;
                     matcapUV += float2(_MatCapCenterX, _MatCapCenterY);
-                    
-                    // 3. 计算高光中心并叠加
                     float2 highlightCenter = float2(0.5, 0.5) + float2(_HighlightX, _HighlightY);
                     float dist = length(matcapUV - highlightCenter);
                     float highlightMask = 1.0 - smoothstep(_HighlightSize, _HighlightSize + _HighlightSoftness, dist);
-                    
                     finalColor += _HighlightColor.rgb * highlightMask;
                 #endif
 
