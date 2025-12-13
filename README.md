@@ -1,109 +1,106 @@
-# ⚡ ZZZ-Production-Pipeline (V2.0)
+# ⚡ ZZZ-Pipeline V2.5: Native Awakening (原生觉醒)
 
-> **Current Status:** 🚧 Active Development (Day 13)
-> **Branch:** `v2.0-development`
-> **Codename:** Industrial Crystal (工业结晶)
+> **Current Status:** 🏗️ V2.5-alpha (Day 01 - Native Foundation)
+> **Branch:** `v2.5-development`
+> **Architecture:** Hybrid (Unity Managed C# + Native C++)
 
 ![Unity](https://img.shields.io/badge/Unity-2022.3%2B-black?logo=unity)
-![RenderPipeline](https://img.shields.io/badge/RenderPipeline-URP-blue)
-![Architecture](https://img.shields.io/badge/Architecture-DOD-green)
-![Tests](https://img.shields.io/badge/Tests-Passing-success)
+![Cpp](https://img.shields.io/badge/Native-C%2B%2B17-blue?logo=cplusplus)
+![DirectX](https://img.shields.io/badge/Graphics-DirectX12-green)
+![Status](https://img.shields.io/badge/Status-Active_R%26D-orange)
 
-## 📖 简介 (Introduction)
+## 📖 愿景 (Vision)
 
-**ZZZ-Production-Pipeline V2.0** 是基于 Unity URP 构建的 **二次元风格化渲染工业管线**。
-与 V1.0 的纯视觉探索不同，V2.0 致力于解决 **“规模化生产”** 问题。本项目引入了 **DOD (面向数据设计)**、**自动化测试 (TDD)** 以及 **GPU Driven** 渲染技术，旨在构建一套可扩展、高性能、工具完善的次世代卡通渲染方案。
-
----
-
-## 🏗️ 核心架构 (Core Architecture)
-
-### 🎨 Module A: 渲染奇点 (Visual Singularity)
-> *Goal: 极致的二次元面部表现与海量单位渲染能力。*
-
-- [x] **Uber Shader V2:** 基于 SDF 面部阴影、视差遮蔽 (Parallax)、半兰伯特光照。
-- [ ] **GPU Driven Legion:** 基于 `ComputeShader` + `DrawMeshInstancedIndirect` 实现 10,000+ 单位同屏 (开发中)。
-- [ ] **Stylized Post-Processing:** 风格化后处理 (Bloom, Color Grading)。
-
-### ⚙️ Module B: 工业化工具链 (Industrial Toolchain)
-> *Goal: 用自动化工具解放人力，用 UI Toolkit 提升交互体验。*
-
-- [x] **Cockpit Dashboard:** 基于 **UI Toolkit** 构建的管线可视化控制台。
-- [x] **Asset Processor:** 自动化的资产导入管线（强制 Linear 空间、SDF 贴图自动识别）。
-- [ ] **Art Validator:** 美术资产合规性自动检测工具 (Python/C#)。
-
-### 🧠 Module C: 数据驱动核心 (Data Core)
-> *Goal: 逻辑与数据分离，实现热更友好的配置管理。*
-
-- [x] **Global Render Settings:** 基于 `ScriptableObject` 的全局渲染配置中心。
-- [x] **Runtime Manager:** 使用 `Shader.SetGlobal` 实现高性能的参数同步。
-- [ ] **Profile Switching:** 支持动态切换日夜/室内外渲染配置。
-
-### 🛡️ Module F: 质量保障 (QA & Testing)
-> *Goal: 引入 TDD 流程，确保管线逻辑健壮性。*
-
-- [x] **Unit Testing:** 集成 **NUnit** 框架。
-- [x] **Automation:** 针对 `AssetProcessor` 的自动化测试用例 (`ZZZAssetProcessorTests`)。
+**ZZZ-Pipeline V2.5** 标志着本项目从“应用层开发”向“引擎底层开发”的重大跃迁。
+在 V2.0 完成了工业化工具链与数据驱动架构的构建后，V2.5 旨在突破 C# 脚本层的性能瓶颈。我们将通过 **Native C++ Plugin** 直接与硬件对话，引入 **DirectX 12** 底层图形能力与 **Motion Matching** 高性能动画解算，打造一套“超越引擎限制”的混合架构管线。
 
 ---
 
-## 📅 开发日志 (DevLog)
+## 🏗️ 混合架构概览 (Hybrid Architecture)
 
-### Day 13: 基础设施建设 (Infrastructure)
-- **Feature:** 引入 Unity Test Runner，完成首个资产管线自动化测试。
-- **Feature:** 搭建 UI Toolkit 编辑器窗口框架 (`ZZZPipelineWindow`)。
-- **Refactor:** 重构全局渲染配置为 `GlobalRenderSettings` (ScriptableObject)。
-- **Fix:** 统一全项目编码格式为 UTF-8，修复命名空间冲突。
+本项目采用 **双层架构 (Dual-Layer Architecture)** 设计：
 
-### Day 12: 渲染底层重构
-- **Tech:** 实现 `ComputeBuffer` 数据结构，为 GPU Instancing 铺路。
-- **Shader:** 编写 `Uber_Instanced_Legion` Shader，支持手动矩阵构建。
+### 1. 🟢 Managed Layer (Unity C#)
+> *负责：业务逻辑、工具链、资产管理、高层渲染调度*
+*   **Cockpit Dashboard:** 基于 UI Toolkit 的可视化管线控制台 (V2.0 遗产)。
+*   **Asset Processor:** 自动化资产导入与验证管线。
+*   **Native Bridge:** 负责与底层 DLL 进行互操作 (Interop) 的桥接模块，管理 `IntPtr` 与 `GCHandle`。
 
----
-
-## 🚀 快速开始 (Getting Started)
-
-1. Clone 本仓库 (确保切换到 `v2.0-development` 分支)。
-2. 打开 Unity (推荐 2022.3 LTS)。
-3. 顶部菜单选择 `ZZZ-Pipeline` -> `Open Control Center` 打开管线控制台。
-4. 打开 `Window` -> `General` -> `Test Runner` 运行单元测试。
+### 2. 🔵 Native Layer (Visual Studio C++)
+> *负责：高性能计算、底层图形 API 调用、内存直接操作*
+*   **Memory Invasion:** 绕过 GC，直接操作纹理与 Buffer 的原始内存。
+*   **DirectX 12 Hook (Planned):** 劫持 Unity 图形上下文，实现 Native 级渲染指令提交。
+*   **High-Perf Algorithms:** 承载 Motion Matching 搜索算法与大规模 PCG 逻辑。
 
 ---
 
-*Made with ❤️ by [Your Name] & The AI Architect.*
+## 🗺️ 路线图 (Roadmap & Milestones)
 
+### 📅 Phase 1: 内存与管线 (Memory & Pipeline) [✅ Current Stage]
+*   [x] **Native Environment:** 搭建 VS2022 C++ 开发环境，配置 x64/Release 编译管线。
+*   [x] **Automated Build:** 实现 DLL 自动部署到 Unity Plugins 目录 (`Post-Build Events`)。
+*   [x] **Memory Interop:** 实现 C# `GCHandle` 内存钉住 (Pinning) 与 C++ 指针访问。
+*   [x] **Software Rasterizer:** 在 C++ 端实现软光栅化三角形绘制，验证数据通路畅通。
 
----
+### 📅 Phase 2: 图形底层 (Graphics & DX12) [🚧 Next Step]
+*   [ ] **D3D12 Context Access:** 获取 Unity 的 ID3D12Device 指针。
+*   [ ] **Hello Triangle (Hardware):** 使用原生 DX12 API 绘制第一个三角形。
+*   [ ] **Shared Resources:** 实现 Unity `ComputeBuffer` 与 C++ 的资源共享。
 
-## 🔮 未来展望 (Future Horizons: V2.5)
-**Codename:** Hybrid Core (混合架构)
-*目标：突破 C# 脚本层的性能天花板，构建“Unity + Native C++”的终极形态。*
-
-### 💃 动作之魂：Motion Matching (运动匹配)
-> *Status: R&D Phase (预研阶段)*
-> *Tech Stack: Houdini KineFX -> Unity DOTS*
-
-- 摒弃传统状态机，采用 **数据驱动** 的姿态搜索算法。
-- 构建基于 **Houdini KineFX** 的自动化动捕数据清洗管线。
-- 实现基于 **Job System** 的高并发动画解算。
-
-### ⚡ 性能之骨：Native D3D12 Plugin
-> *Status: Planned (架构规划中)*
-> *Tech Stack: C++ / DirectX 12 / HLSL*
-
-- **Bypass Unity:** 绕过引擎开销，直接通过 C++ DLL 调用底层 Graphics API。
-- **Raw Performance:** 实现 `NativePluginBridge`，接管 Compute Shader 的调度。
-- **Hello Triangle:** 也就是我们即将挑战的 "The First Triangle" —— 从底层画出的第一个三角形。
+### 📅 Phase 3: 动作与未来 (Motion & Future) [🔮 Planned]
+*   [ ] **Motion Matching:** 基于数据驱动的下一代角色运动系统。
+*   [ ] **Data Pipeline:** Houdini KineFX -> AssetProcessor -> Native Binary 格式转换。
+*   [ ] **GPU Driven Culling:** 将剔除逻辑完全移交 C++ / Compute Shader。
 
 ---
 
-## 🏆 The GDC Ambition (技术宣言)
-本项目不仅仅是一个游戏工程，更是一次对 **“独立游戏工业化”** 的极限探索。
-我们的终极目标是将这套管线的开发经验整理成案，剑指 **GDC (Game Developers Conference)** 的 Technical Art / Programming 讲台。
+## 🛠️ 技术栈 (Tech Stack)
 
-**Core Philosophy:**
-1.  **Industrialization:** 用规则对抗混乱，用自动化解放人力。
-2.  **Democratization:** 让独立开发者也能驾驭 3A 级的生产管线。
-3.  **Aesthetics:** 技术永远服务于艺术表达。
+*   **Engine:** Unity 2022.3 LTS (URP)
+*   **Native Core:** Visual Studio 2022 (MSVC v143)
+*   **Language:** C# 9.0 / C++ 17
+*   **Graphics API:** DirectX 11 / DirectX 12
+*   **Tools:** RenderDoc, Unity Profiler
 
-> *"We don't just write code; we forge the tools that build worlds."*
+---
+
+## 🚀 快速开始 (Getting Started for Developers)
+
+由于引入了 Native C++ 模块，环境配置比 V2.0 更为严格：
+
+1.  **Clone Repository:**
+    ```bash
+    git clone -b v2.5-development https://github.com/YourRepo/ZZZ-Pipeline.git
+    ```
+2.  **Prerequisites:**
+    *   Install **Visual Studio 2022**.
+    *   Workload: **Desktop development with C++** (必须包含 MSVC 和 Windows SDK)。
+3.  **Build Native Plugin:**
+    *   Navigate to `NativeSource/ZZZ_Native_Core.sln`.
+    *   Open in VS2022.
+    *   Select **Release** configuration and **x64** platform.
+    *   **Build Solution (Ctrl+Shift+B)**. (DLL will be auto-copied to `Assets/Plugins`).
+4.  **Run in Unity:**
+    *   Open project in Unity.
+    *   Open scene `Scenes/Native_Test`.
+    *   Press Play to see the C++ driven software rasterizer.
+
+---
+
+## 📄 目录结构 (Directory Structure)
+
+```text
+ZZZ-Pipeline/
+├── Assets/
+│   ├── Plugins/          # [Auto-Generated] 存放编译好的 ZZZ_Native_Core.dll
+│   ├── Scripts/
+│   │   └── Framework/    # 包含 NativeBridge.cs
+│   └── ...
+├── NativeSource/         # [New] C++ 原生项目源代码
+│   ├── ZZZ_Native_Core/
+│   │   ├── NativeEntry.cpp
+│   │   └── ...
+│   └── ZZZ_Native_Core.sln
+├── Library/
+└── README.md
+```
