@@ -593,8 +593,8 @@ MonoBehaviour:
   computeShader: {fileID: 7200000, guid: a8c3233dda3d36740941224255977dfa, type: 3}
   characterParts:
   - partName: 
-    mesh: {fileID: 0}
-    material: {fileID: 0}
+    mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+    material: {fileID: 2100000, guid: 4b9a05074bfcd4e41918dde925092ec2, type: 2}
   - partName: 
     mesh: {fileID: 0}
     material: {fileID: 0}
