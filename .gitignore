@@ -27,3 +27,15 @@ UserSettings/
 # OS generated
 .DS_Store
 Thumbs.db
+# --- C++ / Visual Studio Ignore ---
+.vs/
+x64/
+x86/
+Debug/
+Release/
+*.obj
+*.pdb
+*.user
+*.tlog
+*.idb
+*.ipch
