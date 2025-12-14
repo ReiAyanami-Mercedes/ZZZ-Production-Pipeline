@@ -72,11 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>ZZZ_Native_Core</TargetName>
-    <OutDir>..\..\..\..\UnityProject\ThePipeline\Assets\Plugins</OutDir>
+    <OutDir>..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>ZZZ_Native_Core</TargetName>
-    <OutDir>..\..\..\..\UnityProject\ThePipeline\Assets\Plugins</OutDir>
+    <OutDir>..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -147,10 +147,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="pch.h" />
+    <ClInclude Include="MotionCore.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MotionCore.cpp" />
     <ClCompile Include="NativeEntry.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

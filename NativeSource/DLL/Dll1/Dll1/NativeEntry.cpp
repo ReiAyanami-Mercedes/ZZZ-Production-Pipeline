@@ -1,57 +1,61 @@
-﻿#include <math.h> //我们需要数学库算坐标
+﻿#include <vector>
+#include <random>
+#include "MotionCore.h" // 引入 MotionCore
 
 #define DLLExport __declspec(dllexport)
 
+// --- 旧的粒子系统代码 (保留) ---
+struct ParticleData
+{
+    float position[4];
+    float color[4];
+};
+
 extern "C"
 {
-    // 简单的加法保留着，当个吉祥物
-    DLLExport int NativeAdd(int a, int b) { return a + b; }
-
-    // 🔥🔥🔥 核心函数：绘制三角形 🔥🔥🔥
-    // data: 这是一个指向 Unity 贴图原始内存的指针 (RGBA32格式，每个像素4个字节)
-    // width, height: 贴图尺寸
-    // time: 用来让三角形动起来
-    DLLExport void DrawNativeTriangle(unsigned char* data, int width, int height, float time)
+    // --- 粒子系统接口 (保留) ---
+    DLLExport void InitNativeWorld(ParticleData* data, int count, float spread, unsigned int seed)
     {
-        // 遍历每一个像素 (Y行 X列)
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                // 1. 计算当前像素在内存中的索引 (每个像素占 4 字节: R, G, B, A)
-                int index = (y * width + x) * 4;
-
-                // 2. 归一化坐标 (把 x,y 变成 0.0 到 1.0)
-                float u = (float)x / width;
-                float v = (float)y / height;
-
-                // 3. 三角形数学逻辑 (Barycentric 或者简单的线性方程)
-                // 这里我们用一个简单的动态波形模拟三角形的边缘
-                // 让三角形随时间旋转/扭曲一点点
-                float offset = sin(v * 10.0f + time * 5.0f) * 0.1f;
-
-                // 简单的三角形判定：下半部分宽，上半部分尖
-                // abs(u - 0.5) < v : 这是一个倒三角形
-                // abs(u - 0.5) < (1.0 - v) : 这是一个正三角形
-                bool isInside = fabs(u - 0.5f + offset) < (v * 0.8f);
-
-                if (isInside)
-                {
-                    // --- 画三角形内部 (赛博绿色) ---
-                    data[index + 0] = 0;    // R
-                    data[index + 1] = 255;  // G (最亮)
-                    data[index + 2] = 100;  // B
-                    data[index + 3] = 255;  // Alpha
-                }
-                else
-                {
-                    // --- 画背景 (深灰色) ---
-                    data[index + 0] = 30;   // R
-                    data[index + 1] = 30;   // G
-                    data[index + 2] = 30;   // B
-                    data[index + 3] = 255;  // Alpha
-                }
-            }
+        std::mt19937 gen(seed);
+        std::uniform_real_distribution<float> dis(-spread / 2.0f, spread / 2.0f);
+        for (int i = 0; i < count; i++) {
+            data[i].position[0] = dis(gen);
+            data[i].position[1] = 0;
+            data[i].position[2] = dis(gen);
+            data[i].position[3] = 1.0f;
+            data[i].color[0] = 1.0f; data[i].color[1] = 1.0f; data[i].color[2] = 1.0f; data[i].color[3] = 1.0f;
         }
+    }
+
+    DLLExport void UpdateNativeWorld(ParticleData* data, int count, float deltaTime)
+    {
+        // 简单的更新逻辑保留
+        for (int i = 0; i < count; ++i) {
+            data[i].position[1] += 1.0f * deltaTime;
+            if (data[i].position[1] > 5.0f) data[i].position[1] = 0.0f;
+        }
+    }
+
+    // --- 🔥🔥🔥 新增：Motion Matching 接口 🔥🔥🔥 ---
+
+    DLLExport MotionDataset* InitMotionSystem(int frameCount)
+    {
+        return CreateTestMotionData(frameCount);
+    }
+
+    DLLExport void ReleaseMotionSystem(MotionDataset* dataset)
+    {
+        if (dataset != nullptr)
+        {
+            if (dataset->Frames != nullptr) delete[] dataset->Frames;
+            delete dataset;
+        }
+    }
+
+    // 新增：查询接口
+    DLLExport int QueryMotionSystem(MotionDataset* dataset, MotionQuery query)
+    {
+        if (dataset == nullptr) return -1;
+        return SearchBestFrame(dataset, query);
     }
 }
