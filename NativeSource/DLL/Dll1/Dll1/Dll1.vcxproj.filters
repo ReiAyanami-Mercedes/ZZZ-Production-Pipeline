@@ -18,11 +18,11 @@
     <ClInclude Include="MotionCore.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MotionData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NativeEntry.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MotionCore.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

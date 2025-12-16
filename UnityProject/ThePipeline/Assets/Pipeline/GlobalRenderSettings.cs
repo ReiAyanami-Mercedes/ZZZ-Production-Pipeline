@@ -7,7 +7,6 @@ namespace ZZZ.Runtime
     public class GlobalRenderSettings : ScriptableObject
     {
         // --- 1. 风格化渲染配置 (Toon Shading) ---
-        // [Fix] 删掉了 🎨 Emoji
         [Header("Toon Shading Settings")]
 
         [Tooltip("Global Shadow Color")]
@@ -22,7 +21,6 @@ namespace ZZZ.Runtime
         public float sdfSmoothness = 0.05f;
 
         // --- 2. 描边配置 (Outline) ---
-        // [Fix] 删掉了 🖋️ Emoji
         [Header("Outline Settings")]
         public bool enableOutline = true;
 
@@ -32,7 +30,6 @@ namespace ZZZ.Runtime
         public Color outlineColor = Color.black;
 
         // --- 3. 系统配置 (System) ---
-        // [Fix] 删掉了 ⚙️ Emoji
         [Header("System Settings")]
         public bool gpuInstancing = true;
         public bool debugMode = false;

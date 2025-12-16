@@ -148,10 +148,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="MotionCore.h" />
+    <ClInclude Include="MotionData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MotionCore.cpp" />
-    <ClCompile Include="NativeEntry.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
