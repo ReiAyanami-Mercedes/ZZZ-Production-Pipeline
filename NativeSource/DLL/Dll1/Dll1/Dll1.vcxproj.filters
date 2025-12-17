@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MotionCore.h">
+    <ClInclude Include="ZZZKernelAPI.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MotionData.h">
+    <ClInclude Include="ZZZKernelTypes.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MotionCore.cpp">
+    <ClCompile Include="ZZZKernel.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

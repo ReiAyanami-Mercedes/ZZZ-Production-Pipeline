@@ -660,6 +660,56 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1740146341
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1740146343}
+  - component: {fileID: 1740146342}
+  m_Layer: 0
+  m_Name: KernelBridge
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1740146342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740146341}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cca14f9176c2b7149b85c0cdbe791eee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entityCount: 10000
+  meshPrefab: {fileID: 9149700295636740819, guid: 14c9f89474debe948b091155578347bd,
+    type: 3}
+  waveSpeed: 2
+  waveHeight: 2
+  waveFrequency: 0.1
+--- !u!4 &1740146343
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740146341}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.53575623, y: 1.6998948, z: 0.6032068}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1758873062
 GameObject:
   m_ObjectHideFlags: 0
@@ -814,3 +864,4 @@ SceneRoots:
   - {fileID: 1174423506}
   - {fileID: 334848802}
   - {fileID: 1893481916}
+  - {fileID: 1740146343}

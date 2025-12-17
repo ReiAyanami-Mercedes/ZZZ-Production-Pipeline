@@ -12,7 +12,6 @@ UserSettings/
 .vscode/
 *.csproj
 *.unityproj
-*.sln
 *.suo
 *.tmp
 *.user

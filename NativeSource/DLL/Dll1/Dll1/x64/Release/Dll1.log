@@ -1,7 +1,8 @@
-﻿  MotionCore.cpp
-    正在创建库 ..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\ZZZ_Native_Core.lib 和对象 ..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\ZZZ_Native_Core.exp
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: 中间目录(x64\Release\)包含从另一个项目(Dll1.vcxproj)共享的文件。   这会导致错误的清除和重新生成行为。
+  ZZZKernel.cpp
+    正在创建库 ..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\ZZZKernel.lib 和对象 ..\..\..\..\UnityProject\ThePipeline\Assets\Plugins\ZZZKernel.exp
   正在生成代码
-  Compiler switch has changed, fall back to full compilation.
-  All 113 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Previous IPDB not found, fall back to full compilation.
+  All 167 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
-  Dll1.vcxproj -> D:\MyProject\ZZZ-Production-Pipeline\UnityProject\ThePipeline\Assets\Plugins\ZZZ_Native_Core.dll
+  Dll1.vcxproj -> D:\MyProject\ZZZ-Production-Pipeline\UnityProject\ThePipeline\Assets\Plugins\ZZZKernel.dll

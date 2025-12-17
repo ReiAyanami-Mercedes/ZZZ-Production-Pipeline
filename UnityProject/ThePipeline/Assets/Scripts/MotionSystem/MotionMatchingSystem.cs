@@ -14,7 +14,7 @@ namespace ZZZ.Runtime.Motion
         // =========================================================
         // 1. Native Interface (C++ DLL 契约)
         // =========================================================
-        private const string DLL_NAME = "ZZZ_Native_Core";
+        private const string DLL_NAME = "ZZZKernel";
 
         [DllImport(DLL_NAME, CallingConvention = CallingConvention.Cdecl)]
         private static extern int LoadMotionData(string filepath);
